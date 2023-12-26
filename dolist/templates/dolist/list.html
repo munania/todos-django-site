@@ -1,0 +1,5 @@
+<ul>
+    {% for task in tasks %}
+        <li>{{ task.title }} - {{ task.description }} - {% if task.completed %}Completed{% else %}Pending{% endif %}</li>
+    {% endfor %}
+</ul>

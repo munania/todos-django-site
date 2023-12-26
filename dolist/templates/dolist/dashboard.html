@@ -1,0 +1,71 @@
+{% extends 'dolist/base.html' %}
+
+
+{% block content %}
+
+    {% if user.is_authenticated %}
+        <h1 class="mt-5">Welcome, {{ user.username }}</h1>
+    {% else %}
+        <h1 class="mt-5">Welcome, Guest</h1>
+    {% endif %}
+
+    <h3><a href="{% url 'logout' %}">Logout</a></h3>
+    <br>
+    <hr>
+
+    <form method="post" class="mt-3">
+        {% csrf_token %}
+
+        <table>
+            {{ taskForm.as_table }}
+        </table>
+        
+        <div class="input-group mb-3">
+            <button class="btn btn-primary btn-block" type="submit">Add</button>
+        </div>
+    </form>
+
+    <h1 class="mt-5">To-Do List</h1>
+
+    <ul class="list-group">
+        {% for task in tasks  %}
+            <li class="list-group-item {% if task.completed %}completed{% endif %}">
+                {{ task.title }} {% if task.completed %} <span class="text-success"> - Task Completed</span>{% endif %}
+
+                <div class="float-right">
+                    <button type="button" class="btn btn-danger btn-sm" onclick="deleteTask('{{ task.id }}')">Delete</button>
+                    <a href="{% url 'edit_task' task.id %}" class="btn btn-primary btn-sm">Edit</a>
+                </div>
+            </li>
+        {% endfor %}
+
+    </ul>
+
+    <script>
+        function deleteTask(taskId) {
+            // You can use AJAX to send a DELETE request to the server
+            // Here's a simple example using fetch API
+            fetch(`/delete_task/${taskId}/`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Task deleted successfully, you may want to update the UI
+                    console.log('Task deleted successfully.');
+                    location.reload();  // Reload the page to reflect the changes
+                } else {
+                    // Task deletion failed, handle the error
+                    console.error('Task deletion failed.');
+                }
+            })
+            .catch(error => {
+                console.error('Error during task deletion:', error);
+            });
+        }
+    </script>
+
+{% endblock %}
